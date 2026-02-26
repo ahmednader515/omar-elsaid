@@ -1,11 +1,14 @@
+import { auth } from "@/lib/auth";
 import { Navbar } from "./_components/navbar";
 import { Sidebar } from "./_components/sidebar";
 
-const DashboardLayout = ({
+const DashboardLayout = async ({
     children,
 }: {
     children: React.ReactNode;
 }) => {
+    await auth(); // Redirects to /sign-in if not authenticated
+
     return ( 
         <div className="min-h-screen flex flex-col dashboard-layout">
             <div className="h-[80px] fixed inset-x-0 top-0 w-full z-50">
