@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { LoadingButton } from "@/components/ui/loading-button";
@@ -8,13 +8,23 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import Link from "next/link";
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import { Eye, EyeOff, ChevronLeft } from "lucide-react";
 import Image from "next/image";
 import { getDashboardUrlByRole } from "@/lib/utils";
 
 export default function SignInPage() {
   const router = useRouter();
+  const { data: session, status } = useSession();
+
+  // Redirect authenticated users to their dashboard
+  useEffect(() => {
+    if (status === "authenticated" && session?.user) {
+      const dashboardUrl = getDashboardUrlByRole(session.user.role || "USER");
+      router.replace(dashboardUrl);
+    }
+  }, [session, status, router]);
+
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
@@ -71,6 +81,11 @@ export default function SignInPage() {
       setIsLoading(false);
     }
   };
+
+  // Show nothing while loading or redirecting authenticated users
+  if (status === "loading" || (status === "authenticated" && session?.user)) {
+    return null;
+  }
 
   return (
     <div className="flex min-h-screen bg-background overflow-y-auto">
